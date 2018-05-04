@@ -76,9 +76,32 @@ Plugin.prototype.apply = function(compiler) {
         });
         chunks[chunk.name] = files;
       });
+
+      var entrypoints = {};
+      if (stats.compilation.entrypoints) {
+        stats.compilation.entrypoints.forEach(function (entrypoint) {
+          var files = [];
+          entrypoint.chunks.forEach(function (chunk) {
+            files = files.concat(files, chunk.files.map(function (file) {
+              var A = {name: file};
+              var publicPath = self.options.publicPath || compiler.options.output.publicPath;
+              if (publicPath) {
+                A.publicPath = publicPath + file;
+              }
+              if (compiler.options.output.path) {
+                A.path = path.join(compiler.options.output.path, file);
+              }
+              return A;
+            }));
+          });
+          entrypoints[entrypoint.options.name] = files;
+        });
+      }
+
       var output = {
         status: 'done',
-        chunks: chunks
+        chunks: chunks,
+        entrypoints: entrypoints
       };
 
       if (self.options.logTime === true) {
