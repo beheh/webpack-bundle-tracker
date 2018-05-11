@@ -62,22 +62,6 @@ Plugin.prototype.apply = function(compiler) {
       }
 
       var chunks = {};
-      stats.compilation.chunks.map(function(chunk){
-        var files = chunk.files.map(function(file){
-          var F = {name: file};
-          var publicPath = self.options.publicPath || compiler.options.output.publicPath;
-          if (publicPath) {
-            F.publicPath = publicPath + file;
-          }
-          if (compiler.options.output.path) {
-            F.path = path.join(compiler.options.output.path, file);
-          }
-          return F;
-        });
-        chunks[chunk.name] = files;
-      });
-
-      var entrypoints = {};
       if (stats.compilation.entrypoints) {
         stats.compilation.entrypoints.forEach(function (entrypoint) {
           var files = [];
@@ -94,14 +78,13 @@ Plugin.prototype.apply = function(compiler) {
               return A;
             }));
           });
-          entrypoints[entrypoint.options.name] = files;
+          chunks[entrypoint.options.name] = files;
         });
       }
 
       var output = {
         status: 'done',
-        chunks: chunks,
-        entrypoints: entrypoints
+        chunks: chunks
       };
 
       if (self.options.logTime === true) {
